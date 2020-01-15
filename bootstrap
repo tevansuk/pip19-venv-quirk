@@ -1,24 +1,22 @@
-#!/bin/sh
+#!/bin/bash
 
-PY=""
 VENV_DIR="venv"
+PY=("python2.7" "-m" "virtualenv")
+PY=("python3.6" "-m" "venv")
+SCL_PY=python27
+SCL_PY=rh-python36
+SCL_VENV="virtualenv ${VENV_DIR} --system-site-packages; scl_patch_virtualenv ${VENV_DIR}"
+[ -d "$VENV_DIR" ] && rm -rf "$VENV_DIR"
 
-if [ ! -d $VENV_DIR ]; then
-    if `command -v scl >/dev/null 2>&1`; then
-        scl enable python27 "
-             which virtualenv
-             /opt/rh/python27/root/usr/bin/virtualenv ${VENV_DIR} --system-site-packages
-     
-             scl_patch_virtualenv ${VENV_DIR} 
-        "
-    else
-        python2.7 -m virtualenv ${VENV_DIR} --system-site-packages
-    fi
+if `command -v scl >/dev/null 2>&1`; then
+    scl enable "$SCL_PY" "$SCL_VENV"
+else
+    "${PY[@]}" ${VENV_DIR} --system-site-packages
 fi
 
 ln -sf $VENV_DIR/bin/activate
 . ./activate
 
-pip install --upgrade "pip<20"
-pip install --upgrade "setuptools>40,<45"
-pip install ./somepkg
+pip install --no-cache-dir --upgrade "pip<20"
+pip install --no-cache-dir --upgrade "setuptools>40,<45"
+pip install --no-cache-dir ./somepkg
