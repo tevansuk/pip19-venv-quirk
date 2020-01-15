@@ -1,0 +1,24 @@
+#!/bin/sh
+
+PY=""
+VENV_DIR="venv"
+
+if [ ! -d $VENV_DIR ]; then
+    if `command -v scl >/dev/null 2>&1`; then
+        scl enable python27 "
+             which virtualenv
+             /opt/rh/python27/root/usr/bin/virtualenv ${VENV_DIR} --system-site-packages
+     
+             scl_patch_virtualenv ${VENV_DIR} 
+        "
+    else
+        python2.7 -m virtualenv ${VENV_DIR} --system-site-packages
+    fi
+fi
+
+ln -sf $VENV_DIR/bin/activate
+. ./activate
+
+pip install --upgrade "pip<20"
+pip install --upgrade "setuptools>40,<45"
+pip install ./somepkg
